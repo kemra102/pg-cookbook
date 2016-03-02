@@ -1,0 +1,9 @@
+DEPENDENCIES
+  pg
+    path: .
+    metadata: true
+
+GRAPH
+  pg (1.0.0)
+    yum (>= 3.5.2)
+  yum (3.10.0)

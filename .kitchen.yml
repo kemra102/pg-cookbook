@@ -1,0 +1,22 @@
+---
+driver:
+  name: docker
+  use_sudo: false
+
+provisioner:
+  name: chef_zero
+
+platforms:
+  - name: centos-7
+    driver_config:
+      provision_command:
+        - yum -y swap -- remove systemd-container systemd-container-libs -- install systemd
+        - yum -y install iproute
+      run_command: /usr/sbin/init
+      privileged: true
+
+suites:
+  - name: default
+    run_list:
+      - recipe[pg::default]
+    attributes:
