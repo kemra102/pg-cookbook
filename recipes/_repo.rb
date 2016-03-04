@@ -1,4 +1,4 @@
-compact_version = node['pg']['pgdg']['version'].gsub(/\./, '')
+compact_version = node['pg']['pgdg']['version'].delete('.')
 
 if node['pg']['use_pgdg'] && node['pg']['manage_repo']
   cookbook_file "/etc/pki/rpm-gpg/RPM-GPG-KEY-PGDG-#{compact_version}" do

@@ -20,3 +20,11 @@ suites:
     run_list:
       - recipe[pg::default]
     attributes:
+  - name: pgdg
+    run_list:
+      - recipe[pg::default]
+    attributes:
+      pg:
+        use_pgdg: true
+        pgdg:
+          version: '9.5'

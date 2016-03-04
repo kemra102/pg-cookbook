@@ -3,7 +3,7 @@ include_recipe 'pg::_repo'
 
 # Set various attributes
 if node['pg']['use_pgdg']
-  node.default['pg']['packages']['server'] = "postgresql-server#{node['pg']['pgdg']['version'].gsub(/\./, '')}" # rubocop:disable Metrics/LineLength
+  node.default['pg']['packages']['server'] = "postgresql#{node['pg']['pgdg']['version'].delete('.')}-server" # rubocop:disable Metrics/LineLength
   node.default['pg']['version'] = node['pg']['pgdg']['version']
   svc_name = "postgresql-#{node['pg']['pgdg']['version']}"
 else
@@ -32,7 +32,7 @@ directory node['pg']['datadir'] do
 end
 
 # If using PGDG, add symlinks so that downstream commands all work
-compact_version = node['pg']['version'].gsub(/\./, '')
+compact_version = node['pg']['version'].delete('.')
 
 if node['pg']['use_pgdg']
   [
@@ -43,6 +43,9 @@ if node['pg']['use_pgdg']
       to "/usr/pgsql-#{node['pg']['version']}/bin/#{cmd}"
     end
   end
+  link '/usr/bin/initdb' do
+    to "/usr/pgsql-#{node['pg']['version']}/bin/initdb"
+  end
 end
 
 # Initialise database
@@ -52,7 +55,7 @@ if node['pg']['version'].to_f <= 9.3
     not_if { ::File.exist?("#{node['pg']['datadir']}/PG_VERSION") }
   end
 else
-  execute "initdb --data=#{node['pg']['datadir']}" do
+  execute "initdb --pgdata=#{node['pg']['datadir']}" do
     user 'postgres'
     not_if { ::File.exist?("#{node['pg']['datadir']}/PG_VERSION") }
   end
@@ -85,6 +88,6 @@ end
 
 service 'postgresql' do
   service_name svc_name
-  supports :restart => true, :status => true, :reload => true
+  supports restart: true, status: true, reload: true
   action [:enable, :start]
 end
