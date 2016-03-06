@@ -1,0 +1,13 @@
+# This file is managed by Chef!
+
+<% if node['pg']['version'].to_f < 9.1 -%>
+# TYPE  DATABASE        USER            CIDR-ADDRESS            METHOD
+<% elsif node['pg']['version'].to_f >= 9.1 -%>
+# TYPE  DATABASE        USER            ADDRESS                 METHOD
+<% end -%>
+
+<% node['pg']['config']['hba'].each do |_, values| %>
+  <% if values['enabled'] %>
+<%= "#{values['type']}\t#{values['database']}\t#{values['user']}\t#{values['address']}\t#{values['method']}" %>
+  <% end %>
+<% end %>

@@ -61,6 +61,17 @@ else
   end
 end
 
+# Configure pg_hba.conf
+template "#{node['pg']['datadir']}/pg_hba.conf" do
+  cookbook 'pg'
+  source 'pg_hba.conf.erb'
+  owner 'postgres'
+  group 'root'
+  mode '0600'
+  only_if { ::File.exist?("#{node['pg']['datadir']}/PG_VERSION") }
+  notifies :reload, 'service[postgresql]', :delayed
+end
+
 # Manage service
 if node['init_package'] == 'systemd'
   template '/etc/systemd/system/postgresql.service' do
