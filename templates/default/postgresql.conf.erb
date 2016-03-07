@@ -1,0 +1,5 @@
+# This file is managed by Chef!
+
+<% node['pg']['config']['server'].each_pair do |key, value| %>
+<%= key %> = <% if value.class == String %><%= "\'#{value}\'" %><% else %><%= value %><% end %>
+<% end %>

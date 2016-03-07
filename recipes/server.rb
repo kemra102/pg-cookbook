@@ -69,7 +69,18 @@ template "#{node['pg']['datadir']}/pg_hba.conf" do
   group 'root'
   mode '0600'
   only_if { ::File.exist?("#{node['pg']['datadir']}/PG_VERSION") }
-  notifies :reload, 'service[postgresql]', :delayed
+  notifies :restart, 'service[postgresql]', :delayed
+end
+
+# Configure postgresql.conf
+template "#{node['pg']['datadir']}/postgresql.conf" do
+  cookbook 'pg'
+  source 'postgresql.conf.erb'
+  owner 'postgres'
+  group 'root'
+  mode '0600'
+  only_if { ::File.exist?("#{node['pg']['datadir']}/PG_VERSION") }
+  notifies :restart, 'service[postgresql]', :delayed
 end
 
 # Manage service
