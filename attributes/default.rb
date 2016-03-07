@@ -27,7 +27,7 @@ default['pg']['config']['hba']['local'] = {
   enabled: true,
   type: 'local',
   database: 'all',
-  user: 'all',
+  user: 'postgres',
   address: '',
   method: 'trust'
 }
@@ -37,7 +37,7 @@ default['pg']['config']['hba']['host'] = {
   database: 'all',
   user: 'all',
   address: '127.0.0.1/32',
-  method: 'trust'
+  method: 'md5'
 }
 default['pg']['config']['hba']['host6'] = {
   enabled: true,
@@ -45,5 +45,5 @@ default['pg']['config']['hba']['host6'] = {
   database: 'all',
   user: 'all',
   address: '::1/128',
-  method: 'trust'
+  method: 'md5'
 }
