@@ -22,9 +22,9 @@ describe file('/var/lib/pgsql/9.2/data/pg_hba.conf') do
   it { should be_mode 600 }
   it { should be_owned_by 'postgres' }
   it { should be_grouped_into 'root' }
-  it { should contain "local\tall\tall\t\ttrust" }
-  it { should contain "host\tall\tall\t127.0.0.1/32\ttrust" }
-  it { should contain "host\tall\tall\t::1/128\ttrust" }
+  it { should contain "local\tall\tpostgres\t\ttrust" }
+  it { should contain "host\tall\tall\t127.0.0.1/32\tmd5" }
+  it { should contain "host\tall\tall\t::1/128\tmd5" }
 end
 
 describe file('/var/lib/pgsql/9.2/data/postgresql.conf') do

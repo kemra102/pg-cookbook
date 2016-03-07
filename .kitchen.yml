@@ -16,13 +16,23 @@ platforms:
       privileged: true
 
 suites:
-  - name: default
+  - name: default-client
     run_list:
-      - recipe[pg::default]
+      - recipe[pg::client]
+  - name: default-server
+    run_list:
+      - recipe[pg::server]
+  - name: pgdg-client
+    run_list:
+      - recipe[pg::client]
     attributes:
-  - name: pgdg
+      pg:
+        use_pgdg: true
+        pgdg:
+          version: '9.5'
+  - name: pgdg-server
     run_list:
-      - recipe[pg::default]
+      - recipe[pg::server]
     attributes:
       pg:
         use_pgdg: true
