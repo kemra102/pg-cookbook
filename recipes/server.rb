@@ -53,11 +53,13 @@ if node['pg']['version'].to_f <= 9.3
   execute "initdb --locale=#{node['pg']['initdb_locale']} --pgdata=#{node['pg']['datadir']}" do # rubocop:disable Metrics/LineLength
     user 'postgres'
     not_if { ::File.exist?("#{node['pg']['datadir']}/PG_VERSION") }
+    only_if { node['pg']['initdb'] }
   end
 else
   execute "initdb --pgdata=#{node['pg']['datadir']}" do
     user 'postgres'
     not_if { ::File.exist?("#{node['pg']['datadir']}/PG_VERSION") }
+    only_if { node['pg']['initdb'] }
   end
 end
 

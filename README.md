@@ -7,187 +7,122 @@
 2. [Requirements](#requirements)
 3. [Attributes](#attributes)
 4. [Usage](#usage)
-    * [nginx_server_vhost](#nginx_server_vhost)
-    * [nginx_server_upstream](#nginx_server_upstream)
+    * [pg_hba.conf](#pg_hba.conf)
 5. [Contributing](#contributing)
 6. [License & Authors](#license-and-authors)
 
 ## Overview
 
-This module manages the installation and configuration of NGINX.
+This module manages the installation and configuration of PostgreSQL.
 
 ## Requirements
 
-Requires Chef 12.5 or later as this cookbook makes use of [Custom Resources](https://www.chef.io/blog/2015/10/08/chef-client-12-5-released/).
+None.
 
 ## Attributes
 
-### yumserver::default
+### pg::default
 | Key                               | Type      | Description                                   | Default |
 |:---------------------------------:|:---------:|:---------------------------------------------:|:-------:|
-| `['nginx_server']['manage_repo']` | `Boolean` | If the cookbook should manage the NGINX repo. | `true`  |
-| `['nginx_server']['repo']` | `String` | Which repo to install NGINX from. Only used when `['nginx_server']['manage_repo']` is `true`. Possible values are; `epel`, `nginx-stable` & `nginx-mainline`. | `nginx-stable`  |
-| `['nginx_server']['manage_confd']` | `Boolean` | Whether or not we should *zap* `/etc/nginx/conf.d`. | `true`  |
-| `['nginx_server']['error_log_level']` | `String` | [http://nginx.org/en/docs/ngx_core_module.html#error_log](http://nginx.org/en/docs/ngx_core_module.html#error_log) | `warn`  |
-| `['nginx_server']['worker_connections']` | `Integer` | [http://nginx.org/en/docs/ngx_core_module.html#worker_connections](http://nginx.org/en/docs/ngx_core_module.html#worker_connections) | `1024`  |
-| `['nginx_server']['log_format']` | `String` | [http://nginx.org/en/docs/http/ngx_http_log_module.html#log_format](http://nginx.org/en/docs/http/ngx_http_log_module.html#log_format) | ```"\'$remote_addr - \$remote_user [\$time_local] \"\$request\" ' '\$status \$body_bytes_sent \"\$http_referer\" ' '\"\$http_user_agent\" \"\$http_x_forwarded_for\"'"``` |
-| `['nginx_server']['sendfile']` | `String` | [http://nginx.org/en/docs/http/ngx_http_core_module.html#sendfile](http://nginx.org/en/docs/http/ngx_http_core_module.html#sendfile) | `on`  |
-| `['nginx_server']['tcp_nopush']` | `String` | [http://nginx.org/en/docs/http/ngx_http_core_module.html#tcp_nopush](http://nginx.org/en/docs/http/ngx_http_core_module.html#tcp_nopush) | `off`  |
-| `['nginx_server']['keepalive_timeout']` | `Integer` | [http://nginx.org/en/docs/http/ngx_http_core_module.html#keepalive_timeout](http://nginx.org/en/docs/http/ngx_http_core_module.html#keepalive_timeout) | `65`  |
-| `['nginx_server']['gzip']` | `String` | [http://nginx.org/en/docs/http/ngx_http_gzip_module.html#gzip](http://nginx.org/en/docs/http/ngx_http_gzip_module.html#gzip) | `off`  |
+| `['pg']['use_pgdg']` | `Boolean` | Determines if Postgres should be installed from the [PGDG](http://www.postgresql.org/about/). | `false`  |
+| `['pg']['manage_repo']` | `Boolean` | Determines if this cookbook should manage the PGDG repo. Only applies if `['pg']['use_pgdg']` is set to `true`. | `true`  |
+| `['pg']['pgdg']['version']` | `String` | Determines which version of Postgres should be installed/managed. Only applies if `['pg']['use_pgdg']` is set to `true`. | `9.3`  |
+| `['pg']['initdb']` | `Boolean` | Determines if the `intidb` command should be run to do initial population of the database. | `true`  |
+| `['pg']['initdb_locale']` | `String` | Determines the locale to be used by the `initdb` command on systems running versions less than Postgres 9.4. | `UTF-8`  |
 
-## Usage
+The following attributes are used to populate `postgresql.conf`:
 
-You always need to include the main recipe:
+| Key                               | Type      | Description                                   | Default |
+|:---------------------------------:|:---------:|:---------------------------------------------:|:-------:|
+| `['pg']['config']['server']['port']` | `Integer` | Port that Postgres should listen on. | `5432` |
+| `['pg']['config']['server']['max_connections']` | `Integer` | Determines the number of connection "slots" that are reserved for connections by PostgreSQL superusers. At most max_connections connections can ever be active simultaneously. Whenever the number of active concurrent connections is at least max_connections minus superuser_reserved_connections, new connections will be accepted only for superusers, and no new replication connections will be accepted. | `100` |
+| `['pg']['config']['server']['shared_buffers']` | `String` | Sets the amount of memory the database server uses for shared memory buffers. | `32MB` |
+| `['pg']['config']['server']['logging_collector']` | `Boolean` | This parameter enables the logging collector, which is a background process that captures log messages sent to stderr and redirects them into log files. | `true` |
+| `['pg']['config']['server']['log_filename']` | `String` | When logging_collector is enabled, this parameter sets the file names of the created log files. The value is treated as a strftime pattern, so %-escapes can be used to specify time-varying file names. (Note that if there are any time-zone-dependent %-escapes, the computation is done in the zone specified by log_timezone.) The supported %-escapes are similar to those listed in the Open Group's strftime specification. Note that the system's strftime is not used directly, so platform-specific (nonstandard) extensions do not work. | `postgresql-%a.log` |
+| `['pg']['config']['server']['log_truncate_on_rotation']` | `Boolean` | When logging_collector is enabled, this parameter will cause PostgreSQL to truncate (overwrite), rather than append to, any existing log file of the same name. | `true` |
+| `['pg']['config']['server']['log_rotation_age']` | `String` | When logging_collector is enabled, this parameter determines the maximum lifetime of an individual log file. After this many minutes have elapsed, a new log file will be created. Set to zero to disable time-based creation of new log files. | `1d` |
+| `['pg']['config']['server']['log_rotation_size']` | `Integer` | When logging_collector is enabled, this parameter determines the maximum size of an individual log file. After this many kilobytes have been emitted into a log file, a new log file will be created. Set to zero to disable size-based creation of new log files. | `0` |
+| `['pg']['config']['server']['log_timezone']` | `String` | Sets the time zone used for timestamps written in the server log. Unlike TimeZone, this value is cluster-wide, so that all sessions will report timestamps consistently. | `UTC` |
+| `['pg']['config']['server']['datestyle']` | `String` | Sets the display format for date and time values, as well as the rules for interpreting ambiguous date input values. | `iso, mdy` |
+| `['pg']['config']['server']['timezone']` | `String` | Sets the time zone for displaying and interpreting time stamps. | `UTC` |
+| `['pg']['config']['server']['lc_messages']` | `String` | Sets the language in which messages are displayed. | `en_US.UTF-8` |
+| `['pg']['config']['server']['lc_monetary']` | `String` | Sets the locale to use for formatting monetary amounts, for example with the to_char family of functions. | `en_US.UTF-8` |
+| `['pg']['config']['server']['lc_numeric']` | `String` | Sets the locale to use for formatting numbers, for example with the to_char family of functions. | `en_US.UTF-8` |
+| `['pg']['config']['server']['lc_time']` | `String` | Sets the locale to use for formatting dates and times, for example with the to_char family of functions. | `en_US.UTF-8` |
+| `['pg']['config']['server']['default_text_search_config']` | `String` | Selects the text search configuration that is used by those variants of the text search functions that do not have an explicit argument specifying the configuration. | `pg_catalog.english` |
 
-```ruby
-include_recipe 'nginx_server::default'
-```
+> NOTE: Values that read as `on` or `off` in `postgresql.conf` should be set as `true` or `false` respectively.
 
-This recipe:
-
-* Sets up the NGINX repo (**stable** repo by default).
-* Installs the `nginx` package.
-* Writes the main config to `/etc/nginx/nginx.conf`.
-* *zaps* any files in `/etc/nginx/conf.d/` not managed by Chef.
-* Enables & starts the `nginx` service.
-
-### nginx_server_vhost
-
-This resource defines a standard NGINX vhost.
-
-Each `nginx_server_vhost` has the following attributes:
-
-| Attribute     | Type                 | Description                                                                  | Default                 |
-|:-------------:|:--------------------:|:----------------------------------------------------------------------------:|:-----------------------:|
-| `name`        | `String` or `Symbol` | Resource name.                                                               | `N/A`                   |
-| `listen`      | `Array`              | An array of hashes that describes the NGINX listen statements for the vhost. | `N/A`                   |
-| `server_name` | `String` or `Array`  | Server name(s) that the vhost should respond to.                             | `N/A`                   |
-| `root`        | `String`             | Web root of the vhost.                                                       | `/usr/share/nginx/html` |
-| `index`       | `String`             | Index file for the website.                                                  | `index.html`            |
-| `config`      | `Hash`               | Additional config options to pass to the vhost.                              | `N/A`                   |
-
-To setup a basic vhost for example:
+Finally the following default `pg_hba.conf` entries are:
 
 ```ruby
-nginx_server_vhost 'example.org' do
-  server_name [
-    'example.org',
-    'www.example.org'
-  ]
-  root '/var/www/example.org'
-  action :create
-end
-```
-
-#### `listen`
-
-The `listen` statement is an array of hashes that consists of:
-
-* `ipaddress`
-* `port`
-* `options`
-
-All parts of each hash are options and have sane defaults:
-
-* `ipaddress` = `0.0.0.0`
-* `port` = `80`
-* `options` = `N/A`
-
-For example to listen on the loopback address with SSL:
-
-```ruby
-listen [
-  {
-    'ipaddress': '127.0.0.1',
-    'port': 443,
-    'options': 'ssl'
-  }
-]
-```
-
-this produces a line like this:
-
-```sh
-listen 127.0.0.1:443 ssl;
-```
-
-For more examples see the cookbook's integration test cookbook.
-
-#### `config`
-
-The `config` is a hash of additional config for the vhost not provided by the other properties.
-
-This supports nested config such as `location` statements as well, for example:
-
-```ruby
-config ({
-    'error_page' => '404 /404.html',
-    'location ~ \.php$' => {
-      'try_files' => '$uri =404',
-      'fastcgi_pass' => 'unix:/var/run/php5-fpm.sock',
-      'fastcgi_index' => 'index.php',
-      'fastcgi_param' => 'SCRIPT_FILENAME $document_root$fastcgi_script_name',
-      'include' => 'fastcgi_params'
-    }
-  })
-```
-
-this is rendered as:
-
-```sh
-error_page 404 /404.html;
-location ~ \.php$ {
-  try_files $uri =404;
-  fastcgi_pass unix:/var/run/php5-fpm.sock;
-  fastcgi_index index.php;
-  fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-  include fastcgi_params;
+default['pg']['config']['hba']['local'] = {
+  enabled: true,
+  type: 'local',
+  database: 'all',
+  user: 'postgres',
+  address: '',
+  method: 'trust'
+}
+default['pg']['config']['hba']['host'] = {
+  enabled: true,
+  type: 'host',
+  database: 'all',
+  user: 'all',
+  address: '127.0.0.1/32',
+  method: 'md5'
+}
+default['pg']['config']['hba']['host6'] = {
+  enabled: true,
+  type: 'host',
+  database: 'all',
+  user: 'all',
+  address: '::1/128',
+  method: 'md5'
 }
 ```
 
-For more examples see the cookbook's integration test cookbook.
-
-### nginx_server_upstream
-
-The `nginx_server_upstream` defines an NGINX upstream to be used in tandem with a `nginx_server_vhost` that uses `proxy_pass` or similar to proxy connections to backend servers.
-
-Each `nginx_server_upstream` has the following attributes:
-
-| Attribute       | Type                 | Description                                                                                      | Default |
-|:---------------:|:--------------------:|:------------------------------------------------------------------------------------------------:|:--------|
-| `name`          | `String` or `Symbol` | Resource name.                                                                                   | `N/A`   |
-| `upstream_name` | `String`             | Name of the upstream. Defaults to `name` if not set.                                             | `N/A`   |
-| `servers`       | `Array`              | An Array of Arrays of backend servers that the upstream proxies to including associated options. | `N/A`   |
-| `ip_hash`       | `Boolean`            | Whether or not to turn on the `ip_hash` functionality.                                           | `false` |
-| `keepalive`     | `Integer`            | If set to an Integer turn on and set the `keepalive` functionality with the value supplied.      | `N/A`   |
-| `least_conn`    | `Boolean`            | Whether or not to turn on the `least_conn` functionality.                                        | `false` |
-
-To proxy through to a group of application servers for example:
+The default `pg_hba.conf` entries can be disabled by setting their `enabled` values to `false`, e.g.:
 
 ```ruby
-nginx_server_upstream 'appservers' do
-  ip_hash true
-  least_conn true
-  servers [
-    ['192.168.0.100:8080', 'max_fails=3', 'fail_timeout=30s'],
-    ['192.168.0.101:8080', 'max_fails=3', 'fail_timeout=30s'],
-    ['192.168.0.102:8080', 'max_fails=3', 'fail_timeout=30s']
-  ]
-  action :create
-end
+default['pg']['config']['hba']['local']['enabled'] = false
 ```
 
-will render as:
+## Usage
 
-```sh
-upstream appservers {
-  ip_hash;
-  least_conn;
+This recipe:
 
-  server 192.168.0.100:8080 max_fails=3 fail_timeout=30s;
-  server 192.168.0.101:8080 max_fails=3 fail_timeout=30s;
-  server 192.168.0.102:8080 max_fails=3 fail_timeout=30s;
+* Optionally sets up the PGDG repo.
+* Installs Postgres Client.
+* Installs Postgres Server.
+* Configures Postgres Server.
+* Configures Host-Based Authentication.
+* Manages Postgres service.
+
+To install the Postgres client:
+
+```ruby
+include_recipe 'pg::client'
+```
+
+To install the Postgres server:
+
+```ruby
+include_recipe 'pg::server'
+```
+
+### pg_hba.conf
+
+To create new entries in `pg_hba.conf` create a new uniquely named hash under `['pg']['config']['hba']`, e.g.:
+
+```ruby
+default['pg']['config']['hba']['www'] = {
+  enabled: true,
+  type: 'host',
+  database: 'www',
+  user: 'www',
+  address: '192.168.0.1/32',
+  method: 'md5'
 }
 ```
 
@@ -205,7 +140,7 @@ If you would like to contribute to this cookbook please follow these steps;
 
 ## License and Authors
 
-License: [BSD 2-clause](https://tldrlegal.com/license/bsd-2-clause-license-\(freebsd\)
+License: [BSD 2-Clause](https://tldrlegal.com/license/bsd-2-clause-license-\(freebsd\))
 
 Authors:
 
