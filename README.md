@@ -30,6 +30,7 @@ None.
 | `['pg']['pgdg']['version']` | `String` | Determines which version of Postgres should be installed/managed. Only applies if `['pg']['use_pgdg']` is set to `true`. | `9.3`  |
 | `['pg']['initdb']` | `Boolean` | Determines if the `intidb` command should be run to do initial population of the database. | `true`  |
 | `['pg']['initdb_locale']` | `String` | Determines the locale to be used by the `initdb` command on systems running versions less than Postgres 9.4. | `UTF-8`  |
+| `['pg']['initdb_cmd']` | `String` | The command to be run in order to initialise database. | Varies based on PG Version, see `recipes/server.rb:11-26` |
 
 The following attributes are used to populate `postgresql.conf`:
 

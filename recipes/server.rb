@@ -5,15 +5,25 @@ include_recipe 'pg::_repo'
 if node['pg']['use_pgdg']
   node.default['pg']['packages']['server'] = "postgresql#{node['pg']['pgdg']['version'].delete('.')}-server" # rubocop:disable Metrics/LineLength
   node.default['pg']['version'] = node['pg']['pgdg']['version']
+  node.default['pg']['datadir'] = "/var/lib/pgsql/#{node['pg']['version']}/data"
   svc_name = "postgresql-#{node['pg']['pgdg']['version']}"
+  if node['pg']['version'].to_f <= 9.3
+    node.default['pg']['intidb_cmd'] = "initdb --locale=#{node['pg']['initdb_locale']} --pgdata=#{node['pg']['datadir']}" # rubocop:disable Metrics/LineLength
+  else
+    node.default['pg']['initdb_cmd'] = "initdb --pgdata=#{node['pg']['datadir']}" # rubocop:disable Metrics/LineLength
+  end
 else
   node.default['pg']['packages']['server'] = 'postgresql-server'
   svc_name = 'postgresql'
   case node['platform_version'].to_i
   when 7
     node.default['pg']['version'] = '9.2'
+    node.default['pg']['datadir'] = "/var/lib/pgsql/#{node['pg']['version']}/data" # rubocop:disable Metrics/LineLength
+    node.default['pg']['intidb_cmd'] = "initdb --locale=#{node['pg']['initdb_locale']} --pgdata=#{node['pg']['datadir']}" # rubocop:disable Metrics/LineLength
   when 6
     node.default['pg']['version'] = '8.4'
+    node.default['pg']['datadir'] = "/var/lib/pgsql/#{node['pg']['version']}/data" # rubocop:disable Metrics/LineLength
+    node.default['pg']['intidb_cmd'] = "initdb --locale=#{node['pg']['initdb_locale']} --pgdata=#{node['pg']['datadir']}" # rubocop:disable Metrics/LineLength
   else
     Chef::Application.fatal!('You must be on at least EL6.')
   end
@@ -23,7 +33,6 @@ end
 package node['pg']['packages']['server']
 
 # Manage data directory
-node.default['pg']['datadir'] = "/var/lib/pgsql/#{node['pg']['version']}/data"
 directory node['pg']['datadir'] do
   mode 0_700
   owner 'postgres'
@@ -49,18 +58,11 @@ if node['pg']['use_pgdg']
 end
 
 # Initialise database
-if node['pg']['version'].to_f <= 9.3
-  execute "initdb --locale=#{node['pg']['initdb_locale']} --pgdata=#{node['pg']['datadir']}" do # rubocop:disable Metrics/LineLength
-    user 'postgres'
-    not_if { ::File.exist?("#{node['pg']['datadir']}/PG_VERSION") }
-    only_if { node['pg']['initdb'] }
-  end
-else
-  execute "initdb --pgdata=#{node['pg']['datadir']}" do
-    user 'postgres'
-    not_if { ::File.exist?("#{node['pg']['datadir']}/PG_VERSION") }
-    only_if { node['pg']['initdb'] }
-  end
+execute 'intidb' do
+  command node['pg']['initdb_cmd']
+  user 'postgres'
+  not_if { ::File.exist?("#{node['pg']['datadir']}/PG_VERSION") }
+  only_if { node['pg']['initdb'] }
 end
 
 # Configure pg_hba.conf
