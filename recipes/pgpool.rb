@@ -13,7 +13,7 @@ package node['pg']['packages']['pgpool']
 
 # Update main config
 node.default['pg']['config']['pgpool']['pid_file_name'] = "/var/run/pgpool-II-#{node['pg']['pgdg']['version'].delete('.')}/pgpool.pid" # rubocop:disable Metrics/LineLength
-node.default['pg']['config']['pgpool']['logdir'] = "/var/log/pgpool-II-#{node['pg']['pgdg']['version'].delete('.')}"
+node.default['pg']['config']['pgpool']['logdir'] = "/var/log/pgpool-II-#{node['pg']['pgdg']['version'].delete('.')}" # rubocop:disable Metrics/LineLength
 
 template "/etc/pgpool-II-#{node['pg']['pgdg']['version'].delete('.')}/pgpool.conf" do # rubocop:disable Metrics/LineLength
   cookbook 'pg'

@@ -20,7 +20,7 @@ describe file('/etc/pgpool-II-95/pcp.conf') do
   it { should be_mode 644 }
   it { should be_owned_by 'root' }
   it { should be_grouped_into 'root' }
-  it { should contain "^admin:foobar$" }
+  it { should contain '^admin:foobar$' }
 end
 
 describe file('/etc/pgpool-II-95/pool_hba.conf') do
