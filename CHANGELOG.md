@@ -1,3 +1,13 @@
+## 2016-03-14 (v1.2.0)
+### Summary
+Added pgpool-II support.
+
+#### Features
+- Added pgpool-II support.
+  - Install pgpool-II from PGDG.
+  - Manage all config files.
+  - Manage pgpool-II service.
+
 ## 2016-03-12 (v1.1.0)
 ### Summary
 Made `initdb` optional.
