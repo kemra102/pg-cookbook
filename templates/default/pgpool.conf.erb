@@ -1,6 +1,6 @@
 # This file is managed by Chef!
 
-<% node['pg']['config']['server'].each_pair do |key, value| %>
+<% node['pg']['config']['pgpool'].each_pair do |key, value| %>
 <% next if value.nil? -%>
 <%= key %> = <%=
   case value

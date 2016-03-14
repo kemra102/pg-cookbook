@@ -38,3 +38,14 @@ suites:
         use_pgdg: true
         pgdg:
           version: '9.5'
+  - name: pgpool
+    run_list:
+      - recipe[pg::pgpool]
+    attributes:
+      pg:
+        use_pgdg: true
+        pgdg:
+          version: '9.5'
+        config:
+          pcp:
+            admin: 'foobar'

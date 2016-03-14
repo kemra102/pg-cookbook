@@ -4,6 +4,6 @@ DEPENDENCIES
     metadata: true
 
 GRAPH
-  pg (1.0.0)
+  pg (1.1.0)
     yum (>= 3.5.2)
   yum (3.10.0)
