@@ -1,3 +1,10 @@
+## 2016-03-15 (v1.3.0)
+### Summary
+Configurable `initdb` command.
+
+#### Features
+- The `initdb` is now configurable via an attribute. The default remains the same as previous versions. This change was made to be able to perform alternate commands, for example on a Slave with Streaming Replication you need to copy the data from the master rather than run the traditional initdb command.
+
 ## 2016-03-14 (v1.2.0)
 ### Summary
 Added pgpool-II support.
