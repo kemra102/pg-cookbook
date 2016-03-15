@@ -8,7 +8,7 @@ if node['pg']['use_pgdg']
   node.default['pg']['datadir'] = "/var/lib/pgsql/#{node['pg']['version']}/data"
   svc_name = "postgresql-#{node['pg']['pgdg']['version']}"
   if node['pg']['version'].to_f <= 9.3
-    node.default['pg']['intidb_cmd'] = "initdb --locale=#{node['pg']['initdb_locale']} --pgdata=#{node['pg']['datadir']}" # rubocop:disable Metrics/LineLength
+    node.default['pg']['initdb_cmd'] = "initdb --locale=#{node['pg']['initdb_locale']} --pgdata=#{node['pg']['datadir']}" # rubocop:disable Metrics/LineLength
   else
     node.default['pg']['initdb_cmd'] = "initdb --pgdata=#{node['pg']['datadir']}" # rubocop:disable Metrics/LineLength
   end
@@ -19,11 +19,11 @@ else
   when 7
     node.default['pg']['version'] = '9.2'
     node.default['pg']['datadir'] = "/var/lib/pgsql/#{node['pg']['version']}/data" # rubocop:disable Metrics/LineLength
-    node.default['pg']['intidb_cmd'] = "initdb --locale=#{node['pg']['initdb_locale']} --pgdata=#{node['pg']['datadir']}" # rubocop:disable Metrics/LineLength
+    node.default['pg']['initdb_cmd'] = "initdb --locale=#{node['pg']['initdb_locale']} --pgdata=#{node['pg']['datadir']}" # rubocop:disable Metrics/LineLength
   when 6
     node.default['pg']['version'] = '8.4'
     node.default['pg']['datadir'] = "/var/lib/pgsql/#{node['pg']['version']}/data" # rubocop:disable Metrics/LineLength
-    node.default['pg']['intidb_cmd'] = "initdb --locale=#{node['pg']['initdb_locale']} --pgdata=#{node['pg']['datadir']}" # rubocop:disable Metrics/LineLength
+    node.default['pg']['initdb_cmd'] = "initdb --locale=#{node['pg']['initdb_locale']} --pgdata=#{node['pg']['datadir']}" # rubocop:disable Metrics/LineLength
   else
     Chef::Application.fatal!('You must be on at least EL6.')
   end
