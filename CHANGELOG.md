@@ -1,3 +1,10 @@
+## 2016-03-23 (v1.3.1)
+### Summary
+Reload the service when changing HBA config instead of restarting.
+
+#### Bugfixes
+- Updating config for `pg_hba.conf` will now cause the Postgres service to reload instead of restart. This change was made as doing a full restart caused undesirable behaviour in some situations.
+
 ## 2016-03-15 (v1.3.0)
 ### Summary
 Configurable `initdb` command.
