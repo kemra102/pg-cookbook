@@ -73,7 +73,7 @@ template "#{node['pg']['datadir']}/pg_hba.conf" do
   group 'root'
   mode '0600'
   only_if { ::File.exist?("#{node['pg']['datadir']}/PG_VERSION") }
-  notifies :restart, 'service[postgresql]', :delayed
+  notifies :reload, 'service[postgresql]', :delayed
 end
 
 # Configure postgresql.conf
