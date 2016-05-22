@@ -10,7 +10,7 @@ platforms:
   - name: centos-7
     driver_config:
       provision_command:
-        - yum -y swap -- remove systemd-container systemd-container-libs -- install systemd
+        #- yum -y swap -- remove systemd-container systemd-container-libs -- install systemd
         - yum -y install iproute
       run_command: /usr/sbin/init
       privileged: true
@@ -33,6 +33,14 @@ suites:
   - name: pgdg-server
     run_list:
       - recipe[pg::server]
+    attributes:
+      pg:
+        use_pgdg: true
+        pgdg:
+          version: '9.5'
+  - name: pgbouncer
+    run_list:
+      - recipe[pg::pgbouncer]
     attributes:
       pg:
         use_pgdg: true

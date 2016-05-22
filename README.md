@@ -18,7 +18,8 @@ This module manages the installation and configuration of PostgreSQL.
 
 ## Requirements
 
-None.
+* Chef (no particular version at this time).
+* `yum` Cookbook.
 
 ## Attributes
 
@@ -88,6 +89,51 @@ The default `pg_hba.conf` entries can be disabled by setting their `enabled` val
 
 ```ruby
 default['pg']['config']['hba']['local']['enabled'] = false
+```
+
+### pg::pgbouncer
+
+| Key                               | Type      | Description                                   | Default |
+|:---------------------------------:|:---------:|:---------------------------------------------:|:-------:|
+| `['pg']['packages']['pgbouncer']` | `String` | Specifies the name of the `pgbouncer` package. | `pgbouncer` |
+
+
+The following attributes are usef to populate `/etc/pgbouncer/pgbouncer.ini`:
+
+| Key                               | Type      | Description                                   | Default |
+|:---------------------------------:|:---------:|:---------------------------------------------:|:-------:|
+| `['pg']['config']['pgbouncer']['pgbouncer']['logfile']` | `String` | Specifies log file. Log file is kept open so after rotation `kill -HUP` or on console `RELOAD;` should be done. | `/var/log/pgbouncer/pgbouncer.log` |
+| `['pg']['config']['pgbouncer']['pgbouncer']['pidfile']` | `String` | Specifies the pid file. Without a pidfile, daemonization is not allowed. | `/var/run/pgbouncer/pgbouncer.pid` |
+| `['pg']['config']['pgbouncer']['pgbouncer']['listen_addr']` | `String` | Specifies list of addresses, where to listen for TCP connections. You may also use `*` meaning "listen on all addresses". When not set, only Unix socket connections are allowed. | `127.0.0.1` |
+| `['pg']['config']['pgbouncer']['pgbouncer']['listen_port']` | `Integer` | Which port to listen on. Applies to both TCP and Unix sockets. | `6432` |
+| `['pg']['config']['pgbouncer']['pgbouncer']['auth_type']` | `String` | How to authenticate users. See the [official documentation](https://pgbouncer.github.io/config.html) for support auth types. | `trust` |
+| `['pg']['config']['pgbouncer']['pgbouncer']['auth_file']` | `String` | The name of the file to load user names and passwords from. The file format is the same as the PostgreSQL 8.x pg_auth/pg_pwd file, so this setting can be pointed directly to one of those backend files. | `/etc/pgbouncer/userlist.txt` |
+| `['pg']['config']['pgbouncer']['pgbouncer']['admin_users']` | `Array` | Comma-separated list of database users that are allowed to connect and run all commands on console. Ignored when `auth_type` is `any`, in which case any username is allowed in as admin. | `%w(postgres)` |
+| `['pg']['config']['pgbouncer']['pgbouncer']['stats_users']` | `Array` | Comma-separated list of database users that are allowed to connect and run read-only queries on console. Thats means all `SHOW` commands except `SHOW FDS`. | `%w(stats postgres)` |
+| `['pg']['config']['pgbouncer']['pgbouncer']['pool_mode']` | `String` | Specifies when a server connection can be reused by other clients. | `session` |
+| `['pg']['config']['pgbouncer']['pgbouncer']['server_reset_query']` | `String` | Query sent to server on connection release, before making it available to other clients. | `DISCARD ALL` |
+| `['pg']['config']['pgbouncer']['pgbouncer']['max_client_conn']` | `Integer` | Maximum number of client connections allowed. | `100` |
+| `['pg']['config']['pgbouncer']['pgbouncer']['default_pool_size']` | `integer` | How many server connections to allow per user/database pair. Can be overridden in the per-database configuration. | `20` |
+
+By default the `[databases]` section of `/etc/pgbouncer/pgbouncer.ini` is not populated. You can populate like so:
+
+```ruby
+default['pg']['config']['pgbouncer']['databases']['wordpress'] = 'dbname=wordpress host=postgres.example.net user=wordpress'
+```
+
+You should do this for each database you wish `pgbouncer` to create a connection for.
+
+If `['pg']['config']['pgbouncer']['pgbouncer']['auth_type']` is set to `hba` & `['pg']['config']['pgbouncer']['pgbouncer']['auth_hba_file']` is set then the HBA file can be populated as per the following example:
+
+```ruby
+default['pg']['config']['pool_hba']['md5'] = {
+  enabled: true,
+  type: 'host',
+  database: 'all',
+  user: 'all',
+  address: '0.0.0.0/0',
+  method: 'md5'
+}
 ```
 
 ### pg::pgpool
@@ -231,17 +277,20 @@ default['pg']['config']['pool_hba']['md5'] = {
 
 ## Usage
 
-This recipe:
+This cookbook can:
 
 * Optionally sets up the PGDG repo.
-* Installs Postgres Client.
-* Installs Postgres Server.
-* Configures Postgres Server.
-* Configures Host-Based Authentication.
-* Manages Postgres service.
-* Installs pgpool-II.
-* Configures pgpool-II (including PCP & HBA).
-* Manages pgpool-II service.
+* Install Postgres Client.
+* Install Postgres Server.
+* Configure Postgres Server.
+* Configure Host-Based Authentication.
+* Manage Postgres service.
+* Install pgbouncer.
+* Configure pgbouncer (including HBA if applicable).
+* Manage pgbouncer service.
+* Install pgpool-II.
+* Configure pgpool-II (including PCP & HBA).
+* Manage pgpool-II service.
 
 To install the Postgres client:
 
@@ -253,6 +302,12 @@ To install the Postgres server:
 
 ```ruby
 include_recipe 'pg::server'
+```
+
+To install pgbouncer:
+
+```ruby
+include_recipe 'pg::pgbouncer'
 ```
 
 To install pgpool-II:

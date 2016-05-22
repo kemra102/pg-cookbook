@@ -1,0 +1,20 @@
+;; This file if managed by Chef!
+
+[pgbouncer]
+<%- node['pg']['config']['pgbouncer']['pgbouncer'].each_pair do |key, value| -%>
+<% next if value.nil? -%>
+<%= key %> = <%=
+  case value
+  when Array
+    value.join(', ')
+  else
+    value
+  end
+%>
+<%- end -%>
+
+<%- if node['pg']['config']['pgbouncer']['databases'] -%>
+  <%- node['pg']['config']['pgbouncer']['databases'].each_pair do |key, value| -%>
+<%= key %> = <%= value %>
+  <%- end -%>
+<%- end -%>

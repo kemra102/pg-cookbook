@@ -1,3 +1,4 @@
 Metrics/LineLength:
   Exclude:
+    - 'attributes/pgbouncer.rb'
     - 'recipes/_repo.rb'

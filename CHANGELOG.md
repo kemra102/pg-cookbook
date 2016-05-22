@@ -1,3 +1,13 @@
+## 2016-05-22 (v1.4.0)
+### Summary
+Adds support for pgbouncer.
+
+#### Features
+- Added pgbouncer support:
+  - Install pgbouncer from PGDG.
+  - Manage all config files.
+  - Manage pgbouncer service.
+
 ## 2016-03-23 (v1.3.1)
 ### Summary
 Reload the service when changing HBA config instead of restarting.
